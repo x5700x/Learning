@@ -1,0 +1,137 @@
+#include <iostream>
+using namespace std;
+void bubble_sort(int* arr, int n)
+{
+	int tmp;
+	for (int i = 0; i < n - 1; i++)
+		for (int j = 0; j < n - i - 1; j++)
+		{
+			if (arr[j] > arr[j + 1])
+			{
+				tmp = arr[j];
+				arr[j] = arr[j + 1];
+				arr[j + 1] = tmp;
+			}
+		}
+}
+void selection_sort(int* arr, int n)
+{
+	for (int i = 0; i < n - 1; i++)
+	{
+		int m = i;
+		for (int j = i + 1; j < n; j++)
+		{
+			if (arr[j] < arr[m])
+				m = j;
+		}
+		int tmp;
+		if (m != i)
+		{
+			tmp = arr[i];
+			arr[i] = arr[m];
+			arr[m] = tmp;
+		}
+	}
+}
+void bucket_sort(int* arr, int l, int r,int max) // 桶排序的时间复杂度为O(n + k)，其中k为最大值，也就是说，桶排序除了受数据量影响，还受数据最大值影响，并且额外空间复杂的为O（k）
+{
+	int* tmp = new int[max + 1]{0};
+	for (int i = l; i <= r; i++)
+		tmp[arr[i]]++;
+	int j = 0;
+	for (int i = 1; i <= max; i++)
+	{
+		if (tmp[i] != 0)
+		{
+			while (tmp[i]--)
+				arr[j++] = i;
+		}
+	}
+	delete[]tmp;
+}
+void merge(int* arr, int n, int left, int mid, int right)
+{
+	int p1 = left;
+	int p2 = mid + 1;
+	int* tmp = new int[n];
+	int i = 0;
+	
+	while (p1 <= mid && p2 <= right)
+	{
+		if (arr[p1] <= arr[p2])
+		{
+			tmp[i] = arr[p1];
+			i++;
+			p1++;
+		}
+		else
+		{
+			tmp[i] = arr[p2];
+			p2++;
+			i++;
+		}
+	}
+	while (p1 <= mid)
+	{
+		tmp[i] = arr[p1];
+		i++;
+		p1++;
+	}
+	while (p2 <= right)
+	{
+		tmp[i] = arr[p2];
+		p2++;
+		i++;
+	}
+	for (int i = 0; i < n; i++)
+		arr[left + i] = tmp[i];
+	delete[]tmp;
+}
+void merge_sort(int* arr, int n, int left, int right) //归并排序，用分治的思路将数组分解成左右两部分，对各部分继续此操作，最后一组剩余两个数时分割停止（下次分割left = right,merge_sort直接返回）
+{													  //此时同时遍历左右部分，将小的数放如临时数组，得到升序的临时数组，循环赋值给原数组，此时排完序的数组可以参加上一层的排序
+	int mid = (left + right) / 2;
+	if (left < right)
+	{
+		merge_sort(arr, mid - left + 1, left, mid);//分解，mid - left + 1个元素
+		merge_sort(arr, right - mid, mid + 1, right);//分解，right - mid 个元素
+		merge(arr, n, left, mid, right);//排序已经有顺序的左右两部分
+	}
+} 
+int partition(int* arr, int left, int right)//分割，选定最后一个数为基准，i为界限坐标，i及i左为小于基准的数，i + 1及i + 1右为大于，i + 1为等于
+{											//使 i 为left - 1，每有一个数小于基准就让i++（让出一个位置）让i坐标与j（遍历坐标）的数交换，最后让i + 1 与基准交换
+	int x = arr[right];						//分割的特点，由于比基准大或者小的数都在基准的一边，排序后基准的位置就是升序时的正确位置，所以可以用于排序，好处是没有额外空间且快速
+	int i = left - 1;
+	int tmp;
+	for (int j = left; j < right; j++) 
+	{
+		if (arr[j] < x)
+		{
+			i++;
+			tmp = arr[j];
+			arr[j] = arr[i];
+			arr[i] = tmp;
+		}
+	}
+	tmp = arr[i + 1];
+	arr[i + 1] = arr[right];
+	arr[right] = tmp;
+	return i + 1;
+}
+void quick_sort(int* arr, int l, int r)//快速排序
+{
+	if (l < r)
+	{
+		int tmp = partition(arr, l, r);
+		quick_sort(arr, l, tmp - 1);
+		quick_sort(arr, tmp + 1, r);
+	}
+}
+int main()
+{
+	int A[10] = { 6,5,7,4,8,3,9,2,1,10 };
+	int B[10] = { 10,1,9,2,8,3,4,7,6,5 };
+	bucket_sort(B, 0, 9, 10);
+	for (int i = 0; i < 10; i++)
+		cout << B[i] << ' ';
+	return 0;
+}
