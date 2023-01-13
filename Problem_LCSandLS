@@ -1,0 +1,73 @@
+问题：求A和B的最长子序列和最长子串
+#include<iostream>
+using namespace std;
+int Max(int a, int b)
+{
+	if (a >= b)
+		return a;
+	else
+		return b;
+}
+int LCS(char* A, char* B, int asize, int bsize)  //最长子序列arr[i][j]表示A的前i个元素与B的前j个元素的最长子序列的长度
+{												//最长子序列可以递推，如果A的第i个与B的第j个相同，则arr[i][j] = arr[i - 1][j - 1]，否则为Max(arr[i - 1][j],arr[i][j - 1])
+	int** arr = new int*[asize + 1];			//运用动态规划，记录每一个arr[i][j]
+	for (int i = 0; i <= asize; i++)			//为了表示不分别讨论有没有arr[i - 1][j - 1]存在，设置了前0个元素为0，所以说数组大小为size + 1；
+	{
+		arr[i] = new int[bsize + 1];
+	}
+	for (int i = 0; i < asize; i++)
+		arr[i][0] = 0;
+	for (int j = 0; j < bsize; j++)
+		arr[0][j] = 0;
+	int max = 0;
+	for (int i = 0; i < asize; i++)
+	{
+		for (int j = 0; j < bsize; j++)
+		{
+			if (A[i] == B[j])
+				arr[i+1][j+1] = arr[i][j] + 1;
+			else
+				arr[i+1][j+1] = Max(arr[i + 1][j], arr[i][j + 1]);
+			max = Max(arr[i][j], max);
+		}
+
+	}
+	return max;
+}
+
+int LS(char* A, char* B, int asize, int bsize)
+{
+	int** arr = new int* [asize + 1];			//最长字串，arr[i][j]表示表示从A[i]与B[j]开始往前数有几个相同元素，同样是递推
+	for (int i = 0; i <= asize; i++)			//初始为0，arr[i][j] = arr[i - 1][j - 1] + 1，同时记录最大值
+	{
+		arr[i] = new int[bsize + 1];
+	}
+	for (int i = 0; i <= asize; i++)
+		for (int j = 0; j <= bsize; j++)
+			arr[i][j] = 0;
+	int max = 0;
+	for (int i = 1; i < asize + 1; i++)
+	{
+		for (int j = 1; j < bsize + 1; j++)
+		{
+			if (A[i] == B[j])
+			{
+				arr[i][j] = arr[i - 1][j - 1] + 1;
+			}
+			max = Max(arr[i][j], max);
+		}
+
+	}
+	for (int i = 0; i < asize + 1; i++)
+		delete[] arr[i];
+	delete[] arr;
+	return max;
+}
+
+int main()
+{
+	char A[8] = "abcdabc";
+	char B[8] = "abccdab";
+	cout << LCS(A, B, 7, 7) << ' ';
+	cout << LS(A, B, 7, 7);
+}
